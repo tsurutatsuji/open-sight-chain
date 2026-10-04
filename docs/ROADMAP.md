@@ -19,6 +19,20 @@ Pick anything. Open an issue first for large changes so others can join.
 - [ ] Scalable contribution scoring (Shapley value approximation)
 - [ ] Secure aggregation and differential privacy
 
+## Rewards (stage 3.5)
+
+- [x] Pay rate × improvement, rate halves over time, record rewards in the ledger (`osc/rewards.py`)
+- [ ] Choose a realistic halving period and initial rate (simulation over many rounds)
+- [ ] Merkle proof per device so a device can claim its reward on-chain (stage 4)
+- [ ] Pay more for rare / hard-to-get data, so late joiners with new situations still earn
+
+## Splitting compute across GPUs (stage 6)
+
+- [ ] Add a "GPU lender" role: trains on work it is given, gets paid for verified work
+- [ ] Low-communication training (DiLoCo / DisTrO-style) so home internet is enough
+- [ ] Verify that a lender really did the computation (spot checks, redundant work)
+- [ ] Start with fine-tuning an open LLM, not training from scratch
+
 ## Ledger & network (stages 1–2)
 
 - [ ] Gossip-based block propagation instead of full-chain pull

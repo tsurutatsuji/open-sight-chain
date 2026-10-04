@@ -8,6 +8,7 @@ import numpy as np
 from osc.fedlearn import IMG, Client, accuracy, make_frames, run_round
 from osc.ledger import Chain
 from osc.node import start_node
+from osc.rewards import attach_rewards, payouts, rate
 
 
 class TestLedger(unittest.TestCase):
@@ -94,6 +95,52 @@ class TestFederated(unittest.TestCase):
         _, rec = run_round(w, self.clients, self.X_val, self.y_val)
         for c in rec["contributions"]:
             self.assertEqual(set(c), {"client", "data_hash", "n", "score", "accepted"})
+
+
+class TestRewards(unittest.TestCase):
+    def test_rate_halves(self):
+        self.assertEqual([rate(r, 100, 2) for r in range(1, 6)], [100, 100, 50, 50, 25])
+
+    def test_paid_by_size_of_improvement(self):
+        contribs = [
+            {"client": "a", "score": 0.03, "accepted": True},
+            {"client": "b", "score": 0.01, "accepted": True},
+            {"client": "bad", "score": -0.1, "accepted": False},
+        ]
+        p = payouts(contribs, 1000)
+        self.assertAlmostEqual(p["a"], 30)
+        self.assertAlmostEqual(p["b"], 10)
+        self.assertEqual(p["bad"], 0.0)
+
+    def test_nothing_positive_pays_nothing(self):
+        contribs = [{"client": "a", "score": 0.0, "accepted": True},
+                    {"client": "bad", "score": -0.1, "accepted": False}]
+        self.assertEqual(payouts(contribs, 100), {"a": 0.0, "bad": 0.0})
+
+    def test_early_rounds_pay_more_and_poisoner_earns_zero(self):
+        rng = np.random.default_rng(1)
+        clients = [Client(f"c{i}", *make_frames(80, rng)) for i in range(3)]
+        clients.append(Client("bad", *make_frames(80, rng), malicious=True))
+        X_val, y_val = make_frames(300, rng)
+        w = np.zeros(IMG * IMG + 1)
+        recs = []
+        for r in range(1, 6):
+            w, rec = run_round(w, clients, X_val, y_val)
+            rec["round"] = r
+            recs.append(attach_rewards(rec))
+        self.assertGreater(recs[0]["rewards"]["c0"], recs[-1]["rewards"]["c0"])
+        self.assertTrue(all(rec["rewards"]["bad"] == 0.0 for rec in recs))
+        # later rounds pay less per unit of work too: scores shrink AND the rate halves
+        self.assertGreater(recs[0]["minted"], recs[2]["minted"])
+        self.assertGreater(recs[2]["minted"], recs[4]["minted"])
+
+    def test_tampering_with_a_reward_is_detected(self):
+        c = Chain(difficulty=2)
+        c.add_record({"round": 1, "rewards": {"a": 50.0}})
+        c.mine()
+        c.mine()
+        c.blocks[1].records[0]["rewards"]["a"] = 5000.0
+        self.assertFalse(c.validate()[0])
 
 
 if __name__ == "__main__":

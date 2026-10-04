@@ -5,6 +5,8 @@
 1. Start 3 ledger nodes on localhost and connect them as peers.
 2. Run federated learning rounds. Each round's model hash and per-client
    contribution scores are written to node 1 and mined into a block.
+   Each round also pays rewards: rate x improvement, with the rate halving
+   over time, so early, helpful updates earn the most.
 3. Nodes sync; all three end up holding the same chain.
 4. Tamper with a past record and show that validation catches it.
 """
@@ -18,6 +20,7 @@ import numpy as np
 from osc.fedlearn import IMG, Client, make_frames, run_round
 from osc.ledger import Block, Chain
 from osc.node import start_node
+from osc.rewards import attach_rewards
 
 PORTS = [5101, 5102, 5103]
 ROUNDS = 5
@@ -46,14 +49,21 @@ def main():
     w = np.zeros(IMG * IMG + 1)
 
     print(f"[stage 3] federated learning: {len(clients)} clients, {ROUNDS} rounds")
+    earned = {c.client_id: 0.0 for c in clients}
     for r in range(1, ROUNDS + 1):
         w, record = run_round(w, clients, X_val, y_val)
         record["round"] = r
+        attach_rewards(record)
         post(f"{urls[0]}/records", {"record": record})
         post(f"{urls[0]}/mine")
         scores = ", ".join(f"{c['client']}={c['score']:+.3f}{'' if c['accepted'] else ' (rejected)'}"
                            for c in record["contributions"])
         print(f"  round {r}: val_acc={record['val_accuracy']:.3f} | {scores}")
+        paid = ", ".join(f"{k}={v:.2f}" for k, v in record["rewards"].items())
+        print(f"    [stage 3.5] rate={record['rate']:.0f} | {paid}")
+        for k, v in record["rewards"].items():
+            earned[k] += v
+    print(f"[stage 3.5] total earned: " + ", ".join(f"{k}={v:.2f}" for k, v in earned.items()))
 
     time.sleep(0.3)
     heads = {u: get(f"{u}/chain")["blocks"][-1]["hash"][:12] for u in urls}

@@ -33,7 +33,11 @@ In the prototype the aggregator runs in `demo.py` and writes to one ledger node.
 }
 ```
 
-6. The node mines a block and tells its peers; peers adopt the longest valid chain.
+6. Rewards are added to the record (`osc/rewards.py`): `reward = rate(round) × score` for accepted devices,
+   0 for rejected ones. The rate halves every `HALVING_EVERY` rounds, and scores shrink as the model improves,
+   so early help is paid most. The record gets `rate`, `rewards` and `minted`.
+7. The node mines a block and tells its peers; peers adopt the longest valid chain.
+   Because rewards are inside the block, changing a reward later is detected like any other tampering.
 
 ## Ledger
 

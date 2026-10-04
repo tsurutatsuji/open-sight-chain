@@ -4,10 +4,27 @@
 
 [日本語版はこちら](README.ja.md)
 
-> Status: **rough prototype (v0.0.1)**. The idea is published early on purpose.
+> Status: **rough prototype (v0.0.2)**. The idea is published early on purpose.
 > The architecture is open for debate. Pull requests that rewrite large parts are welcome.
 
 ---
+
+## Why: AI built like Linux
+
+Today the strongest AI is built by a few companies, in giant data centers, mostly in one country
+(about 75% of AI supercomputer capacity is in the US — [Epoch AI, 2025](https://epoch.ai/publications/trends-in-ai-supercomputers)).
+Countries and people without that money or cheap electricity can only rent the result.
+
+open-sight-chain is a bet on the other direction: **AI that everyone builds and nobody owns alone**, the way Linux was built.
+
+| Role | Brings | Gets |
+|---|---|---|
+| **Data holder** (robot, camera, workplace) | learning from data that never leaves the site | rewards for how much it improved the model |
+| **GPU lender** (anyone with spare compute) | training compute | rewards for verified work *(planned)* |
+| **Ledger** (every node) | a shared, tamper-evident record of model fingerprints and rewards | — |
+
+Rewards are highest at the start and shrink as the model gets better, so the people who join early and help most earn most.
+Everything here is open source under Apache 2.0 — no patents, no closed core.
 
 ## The idea
 
@@ -40,8 +57,10 @@ open-sight-chain combines three known pieces to address all three:
 | 1 | Hash-chained ledger with tamper detection | `osc/ledger.py` | ✅ working |
 | 2 | Multiple nodes syncing over HTTP (longest valid chain) | `osc/node.py` | ✅ working |
 | 3 | Federated learning + contribution scoring + poisoning rejection | `osc/fedlearn.py` | ✅ working (toy model) |
+| 3.5 | Rewards: rate × improvement, rate halves over time, recorded in the ledger | `osc/rewards.py` | ✅ working (reward units, no token) |
 | 4 | On-chain provenance registry (smart contract) | `contracts/ProvenanceRegistry.sol` | 📐 design skeleton |
 | 5 | Open network with incentives & Sybil resistance | — | 💡 open problem |
+| 6 | Split training compute across borrowed GPUs (LLMs too) | — | 💡 open problem |
 
 ## Quick start
 
@@ -59,7 +78,10 @@ Expected demo output (abridged):
 [stage 2] 3 ledger nodes up
 [stage 3] federated learning: 4 clients, 5 rounds
   round 1: val_acc=1.000 | device-0=+0.060, device-1=+0.065, device-2=+0.063, device-bad=-0.150 (rejected)
+    [stage 3.5] rate=1000 | device-0=59.80, device-1=65.10, device-2=63.20, device-bad=0.00
   ...
+  round 5: val_acc=1.000 | device-0=+0.027, device-1=+0.026, device-2=+0.025, device-bad=-0.059 (rejected)
+    [stage 3.5] rate=250 | device-0=6.75, device-1=6.58, device-2=6.28, device-bad=0.00
 [stage 2] chain heads: {...} -> all nodes agree
 [stage 1] tamper test: change device-bad's score in round 2 to +0.5
   before: (True, 'ok')
@@ -84,6 +106,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/ARCHITECTURE.md](docs/ARCHITEC
 
 This project stands on existing research, not a claim of novelty for the combination:
 FedAvg (McMahan et al., 2017), BlockFL (Kim et al., 2019), Bittensor, Ocean Protocol, Flower.
+Related efforts on decentralized training: Nous Research Psyche, Pluralis (Protocol Learning), Templar.
 
 ## License
 
