@@ -4,7 +4,7 @@ Thanks for looking. This project is an early sketch; big changes are welcome.
 
 ## How to contribute
 
-1. Look at [docs/ROADMAP.md](docs/ROADMAP.md) or open issues.
+1. Look at [docs/ROADMAP.md](docs/ROADMAP.md), open issues, or this week's **Paper watch** issue (new papers to bring into the code).
 2. For large changes, open an issue first to discuss the direction.
 3. Fork, branch, change, and run the tests:
    ```bash

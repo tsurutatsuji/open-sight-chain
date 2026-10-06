@@ -108,6 +108,8 @@ This project stands on existing research, not a claim of novelty for the combina
 FedAvg (McMahan et al., 2017), BlockFL (Kim et al., 2019), Bittensor, Ocean Protocol, Flower.
 Related efforts on decentralized training: Nous Research Psyche, Pluralis (Protocol Learning), Templar.
 
+We try to stay on top of new research: [docs/PAPERS.md](docs/PAPERS.md) maps 62 related papers and where this project sits, and every morning a bot posts new arXiv papers to the weekly **Paper watch** issue. Pick one and bring it into the code.
+
 ## License
 
 [Apache License 2.0](LICENSE). "open-sight-chain" is the project name maintained by [@tsurutatsuji](https://github.com/tsurutatsuji).

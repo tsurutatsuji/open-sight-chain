@@ -81,6 +81,8 @@ python -m unittest -v
 組み合わせの新しさを主張するものではありません。土台：FedAvg（McMahan ほか 2017）、BlockFL（Kim ほか 2019）、Bittensor、Ocean Protocol、Flower。
 分散学習の近い取り組み：Nous Research Psyche、Pluralis（Protocol Learning）、Templar。
 
+最新の研究をすぐ取り込む方針です：[docs/PAPERS.md](docs/PAPERS.md) に関連論文62本とこのプロジェクトの位置をまとめています。毎朝、新しい arXiv 論文が週ごとの **Paper watch** Issue に自動で届きます。1本選んでコードに取り込んでください。
+
 ## ライセンス
 
 [Apache License 2.0](LICENSE)。プロジェクト名「open-sight-chain」の管理者は [@tsurutatsuji](https://github.com/tsurutatsuji)。

@@ -2,6 +2,12 @@
 
 Pick anything. Open an issue first for large changes so others can join.
 
+## Keeping up with research
+
+- [x] Daily arXiv watch posted to a weekly issue (`tools/paper_watch.py`, `.github/workflows/paper-watch.yml`)
+- [x] Paper map of 62 related papers (`docs/PAPERS.md`)
+- [ ] Each week, bring one new paper into the code or the roadmap
+
 ## Good first issues
 
 - [ ] Add a CLI flag to `demo.py` for number of clients / rounds / malicious clients

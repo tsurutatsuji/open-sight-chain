@@ -1,0 +1,49 @@
+name: Paper watch
+# Every morning (07:00 JST) post new arXiv papers to this week's "Paper watch" issue.
+on:
+  schedule:
+    - cron: "0 22 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Find this week's issue
+        id: issue
+        run: |
+          title="Paper watch $(date -u +%G-W%V)"
+          num=$(gh issue list --state all --search "\"$title\" in:title" --json number,title \
+                --jq ".[] | select(.title == \"$title\") | .number" | head -1)
+          echo "title=$title" >> "$GITHUB_OUTPUT"
+          echo "number=$num" >> "$GITHUB_OUTPUT"
+          if [ -n "$num" ]; then
+            gh issue view "$num" --comments --json body,comments --jq '.body, .comments[].body' > seen.txt
+          else
+            : > seen.txt
+          fi
+      - name: Search arXiv
+        run: python tools/paper_watch.py --days 3 --exclude seen.txt > new.md
+      - name: Post
+        run: |
+          if [ ! -s new.md ]; then echo "nothing new"; exit 0; fi
+          if [ -n "${{ steps.issue.outputs.number }}" ]; then
+            gh issue comment "${{ steps.issue.outputs.number }}" --body-file new.md
+          else
+            {
+              echo "New arXiv papers for open-sight-chain this week. Tick a box and open a PR to bring one into the code."
+              echo "今週の新しい論文です。取り込みたいものにチェックを入れて PR を出してください。"
+              echo
+              cat new.md
+            } > body.md
+            gh issue create --title "${{ steps.issue.outputs.title }}" --body-file body.md
+          fi
